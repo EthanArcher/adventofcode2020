@@ -3,23 +3,17 @@ package day01;
 import utils.AdventOfCodeUtils;
 import utils.FileReader;
 
-import java.io.IOException;
 import java.util.List;
 
 public class Day01 {
 
-    final String filename = "day01/actual.txt";
     private final List<Integer> numbers;
-    private final int target;
+    private final int target = 2020;
 
-    public Day01(int target) {
-        this.target = target;
-        try {
-            List<String> strings = FileReader.readFileToString(filename);
+    public Day01(String filename) {
+        List<String> strings = FileReader.readFileToString(filename);
             numbers = AdventOfCodeUtils.toListOfIntegers(strings);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     public String findSetOf2NumbersThatSumToTarget() {
