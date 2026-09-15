@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,7 @@ public class FileReader {
         InputStream raw = Day01.class.getClassLoader().getResourceAsStream(filename);
         if (raw == null) {
             System.out.println("Resource not found: " + filename);
-            return Collections.emptyList();
+            throw new IllegalArgumentException("Resource not found: " + filename);
         }
 
         try (BufferedReader reader = new BufferedReader(
@@ -25,7 +24,7 @@ public class FileReader {
             return reader.lines().collect(Collectors.toList());
         } catch (IOException e) {
             System.out.println("Error reading file: " + filename);
-            return Collections.emptyList();
+            throw new IllegalArgumentException("Error reading file: " + filename, e);
         }
     }
 
