@@ -1,6 +1,5 @@
-package day02.day01;
+package day02;
 
-import day02.Day02;
 import org.junit.jupiter.api.Test;
 
 public class Day02Test {

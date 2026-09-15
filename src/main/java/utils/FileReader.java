@@ -29,4 +29,19 @@ public class FileReader {
         }
     }
 
+    public static char[][] readFileToCharGrid(String filename) {
+        List<String> lines = readFileToString(filename);
+        if (lines.isEmpty()) {
+            return new char[0][0];
+        }
+
+        char[][] grid = new char[lines.size()][lines.get(0).length()];
+        for (int i = 0; i < lines.size(); i++) {
+            for (int j = 0; j < lines.get(i).length(); j++) {
+                grid[i][j] = lines.get(i).charAt(j);
+            }
+        }
+        return grid;
+    }
+
 }
