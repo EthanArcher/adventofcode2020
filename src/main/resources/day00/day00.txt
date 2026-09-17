@@ -1,0 +1,13 @@
+
+import utils.FileReader;
+
+public class Day00 {
+
+    final List<String> lines;
+
+    public Day00(String filename) {
+        lines = FileReader.readFileToString(filename);
+    }
+
+
+}
