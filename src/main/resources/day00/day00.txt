@@ -1,5 +1,8 @@
+package day00;
 
 import utils.FileReader;
+
+import java.util.List;
 
 public class Day00 {
 

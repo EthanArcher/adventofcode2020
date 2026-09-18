@@ -33,7 +33,7 @@ cp "$template" "$main_file"
 
 # Replace package, class, and constant names in the copied file (use temp file for portability)
 sed \
--e "s/package org.adventofcode.utils;/package $day;/" \
+-e "s/package day00;/package $day;/" \
 -e "s/Day00/$day_cap/g" \
 -e "s/\"day00\"/\"$day\"/g" \
 "$main_file" > "$main_file.tmp" && mv "$main_file.tmp" "$main_file"
