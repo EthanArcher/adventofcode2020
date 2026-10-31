@@ -23,21 +23,53 @@ example_file="src/main/resources/$day/example.txt"
 
 mkdir -p "$main_dir" "$test_dir" "src/main/resources/$day"
 
-template="src/main/resources/day00/day00.txt"
-if [ ! -f "$template" ]; then
-    echo "Template $template not found"
-    exit 1
+# Don't overwrite a solution that already exists
+if [ ! -s "$main_file" ]; then
+    cat > "$main_file" <<EOF
+package $day;
+
+import utils.FileReader;
+
+import java.util.List;
+
+public class $day_cap {
+
+    final List<String> lines;
+
+    public $day_cap(String filename) {
+        lines = FileReader.readFileToString(filename);
+    }
+
+
+}
+EOF
 fi
 
-cp "$template" "$main_file"
+touch "$actual_file" "$example_file"
 
-# Replace package, class, and constant names in the copied file (use temp file for portability)
-sed \
--e "s/package day00;/package $day;/" \
--e "s/Day00/$day_cap/g" \
--e "s/\"day00\"/\"$day\"/g" \
-"$main_file" > "$main_file.tmp" && mv "$main_file.tmp" "$main_file"
+# Don't overwrite a test that already exists
+if [ ! -s "$test_file" ]; then
+    cat > "$test_file" <<EOF
+package $day;
 
-touch "$actual_file" "$example_file" "$test_file"
+import org.junit.jupiter.api.Test;
+
+public class ${day_cap}Test {
+
+    @Test
+    void testExample() {
+        $day_cap $day = new $day_cap("$day/example.txt");
+
+    }
+
+    @Test
+    void testActual() {
+        $day_cap $day = new $day_cap("$day/actual.txt");
+
+    }
+
+}
+EOF
+fi
 
 echo "Created files for $day"
