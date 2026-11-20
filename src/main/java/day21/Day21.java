@@ -7,81 +7,74 @@ import java.util.stream.Collectors;
 
 public class Day21 {
 
-    final List<String> lines;
-    HashMap<String, List<Set<String>>> allergens = new HashMap<>();
-    List<Food> foodList = new ArrayList<>();
+    final List<Food> foodList = new ArrayList<>();
+    // allergen -> ingredients that could contain it (in every food listing that allergen)
+    final Map<String, Set<String>> allergenCandidates = new HashMap<>();
 
     public Day21(String filename) {
-        lines = FileReader.readFileToString(filename);
-        List<String> allIngredients = new ArrayList<>();
-
-        for (String line : lines) {
+        for (String line : FileReader.readFileToString(filename)) {
             String[] parts = line.split("[()]");
-            Food food = new Food(Arrays.stream(parts[0].trim().split(" ")).map(String::trim).collect(Collectors.toSet()),
+            Food food = new Food(
+                    Arrays.stream(parts[0].trim().split(" ")).map(String::trim).collect(Collectors.toSet()),
                     Arrays.stream(parts[1].replace("contains", "").trim().split(",")).map(String::trim).collect(Collectors.toSet()));
             foodList.add(food);
 
-            allIngredients.addAll(food.ingredients());
-
             for (String allergen : food.allergens()) {
-                allergens.computeIfAbsent(allergen, k -> new ArrayList<>())
-                        .add(food.ingredients());
+                allergenCandidates.computeIfAbsent(allergen, k -> new HashSet<>(food.ingredients()))
+                        .retainAll(food.ingredients());
             }
         }
+    }
 
-        Set<String> possibleIngredients = new HashSet<>();
-        HashMap<String, Set<String>> allergenIngredientMap = new HashMap<>();
+    /**
+     * Count how many times ingredients that can't contain any allergen appear across all foods.
+     */
+    public long part1() {
+        Set<String> possibleAllergens = new HashSet<>();
+        allergenCandidates.values().forEach(possibleAllergens::addAll);
 
-        for (String allergen : allergens.keySet()) {
-            List<Set<String>> ingredientLists = allergens.get(allergen);
-            Set<String> intersection = ingredientLists.get(0);
-            for (Set<String> ingredients : ingredientLists) {
-                intersection = intersection(intersection, ingredients);
-            }
-            System.out.println(allergen + ": " + intersection);
-            allergenIngredientMap.put(allergen, intersection);
-            possibleIngredients.addAll(intersection);
-            allIngredients.removeAll(intersection);
-        }
+        return foodList.stream()
+                .flatMap(food -> food.ingredients().stream())
+                .filter(ingredient -> !possibleAllergens.contains(ingredient))
+                .count();
+    }
 
-        System.out.println(possibleIngredients);
-        System.out.println(allIngredients);
-        System.out.println(allIngredients.size());
+    /**
+     * Work out which ingredient holds each allergen, then list the ingredients sorted by allergen.
+     */
+    public String part2() {
+        // copy the candidate sets so part2 doesn't change the shared state
+        Map<String, Set<String>> remaining = new HashMap<>();
+        allergenCandidates.forEach((allergen, candidates) -> remaining.put(allergen, new HashSet<>(candidates)));
 
-        System.out.println(allergenIngredientMap);
+        Map<String, String> allergenToIngredient = new HashMap<>();
 
-        HashMap<String, String> allergens = new HashMap<>();
-
-        while (allergenIngredientMap.size() > 0) {
+        while (!remaining.isEmpty()) {
             Set<String> solvedAllergens = new HashSet<>();
-            Set<String> toRemove = new HashSet<>();
-            for (String allergen : allergenIngredientMap.keySet()) {
-                if (allergenIngredientMap.get(allergen).size() == 1) {
-                    String r = allergenIngredientMap.get(allergen).stream().findFirst().orElseThrow();
-                    allergens.put(allergen, r);
-                    toRemove.add(r);
-                    solvedAllergens.add(allergen);
+            Set<String> foundIngredients = new HashSet<>();
+            for (Map.Entry<String, Set<String>> entry : remaining.entrySet()) {
+                if (entry.getValue().size() == 1) {
+                    String ingredient = entry.getValue().iterator().next();
+                    allergenToIngredient.put(entry.getKey(), ingredient);
+                    solvedAllergens.add(entry.getKey());
+                    foundIngredients.add(ingredient);
                 }
             }
 
-            solvedAllergens.forEach(allergenIngredientMap::remove);
-
-            for (Set<String> ingredients : allergenIngredientMap.values()) {
-                ingredients.removeAll(toRemove);
+            if (solvedAllergens.isEmpty()) {
+                throw new IllegalStateException("Can't narrow down allergens any further: " + remaining);
             }
 
+            solvedAllergens.forEach(remaining::remove);
+            for (Set<String> candidates : remaining.values()) {
+                candidates.removeAll(foundIngredients);
+            }
         }
 
-        System.out.println(allergens);
-
-        String answer = allergens.entrySet().stream()
+        return allergenToIngredient.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(Map.Entry::getValue)
                 .collect(Collectors.joining(","));
-
-        System.out.println(answer);
-
-
     }
 
     static Set<String> intersection(Collection<String> a, Collection<String> b) {

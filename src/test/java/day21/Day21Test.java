@@ -9,14 +9,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Day21Test {
 
     @Test
-    void testExample() {
+    void testExamplePart1() {
         Day21 day21 = new Day21("day21/example.txt");
-
+        assertEquals(5, day21.part1());
+        assertEquals("mxmxvkd,sqjhc,fvjkl", day21.part2());
     }
 
     @Test
-    void testActual() {
+    void testActualPart1() {
         Day21 day21 = new Day21("day21/actual.txt");
+        System.out.println(day21.part1());
+        System.out.println(day21.part2());
     }
 
     @Test
